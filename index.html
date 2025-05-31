@@ -6,13 +6,24 @@
       <center>
         <h1>Boiler Plate Test</h1>      
          
-        
+      
         <p>Just basic testing being done, later this will do something cool.....maybe</p>
-        <div>
+        <h1>Instructions</h1>
+        <p>Right now you have to manually mount the FS.  After installation open the logs and console feature.  Reboot the CYD by pressing the boot button, watch the terminal until it asks you to press Y to format the FS.  Press Y and format</p>
+        <p>Connect to the ESP via AP method (AP = SpotifyRemoteAP) on your phone or PC, choose your network and enter password to configure WiFi</p>
+        <p>Once configured and device restarts, connect to Https://192.168.1.125/Dev (this message should also display on device but may be garbled since this is alpha)</p>
+        <p>Enter in the client id and secret from your Spotify Dev Account and save them with the button</p>
+        <p>You should be redirected to the spotify login page, click the link to retrieve your access token and allow the remote to start working on your device</p>
+        <p>If you do not have a device currently playing music, press play on the pc app or web player to activate it.  A message SHOULD display to tell you this as well.</p>
+        <p>Once an active device has been set you can use now use your CYD to control Spotify!  The app will take care of token refreshing for you, but if you turn off the device for more than hour you may have to visit Https://192.168.1.125 again to login for a new access token</p>
+      </center>    
+    <center>
+      <div>
           <esp-web-install-button manifest="https://github.com/backwoodsneckbeard/OnTheSpot/blob/master/manifest.json"></esp-web-install-button>
         </div>
-      </center>    
-  </body>
+    </center>
+    
+    </body>
   </html>
 
 <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
