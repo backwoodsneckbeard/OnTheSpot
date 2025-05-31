@@ -4,14 +4,18 @@
     </head>
     <body>
       <center>
-        <h1>Boiler Plate Test</h1>      
-         
-      
-        <p>Just basic testing being done, later this will do something cool.....maybe</p>
-        <h1>Instructions</h1>
-        <p>Right now you have to manually mount the FS.  After installation open the logs and console feature.  Reboot the CYD by pressing the boot button, watch the terminal until it asks you to press Y to format the FS.  Press Y and format</p>
+        <h1>Installation Test - Instructions</h1>                     
         <p>Connect to the ESP via AP method (AP = SpotifyRemoteAP) on your phone or PC, choose your network and enter password to configure WiFi</p>
-        <p>Once configured and device restarts, connect to Https://192.168.1.125/Dev (this message should also display on device but may be garbled since this is alpha)</p>
+        <p>Once configured and device restarts, connect to Https://192.168.1.125/Dev (this message should also display on device as well)</p>
+        <p>
+          If you have not done so, head over to dev.spotify.com and create an account.  
+          Add a new app and call it what you want.  
+          This will generate you a client id and client secret.  
+          For the callback enter in https://192.168.1.125/callback <br />
+          NOTE: Your cyd will display its local IP on the screen once you connect, if it is different from the IP above, enter in this ip for the callback URL instead <br />
+          Enter in the generated client id + secret in the Dev credentials page to save them within the app.
+        </p>
+        
         <p>Enter in the client id and secret from your Spotify Dev Account and save them with the button</p>
         <p>You should be redirected to the spotify login page, click the link to retrieve your access token and allow the remote to start working on your device</p>
         <p>If you do not have a device currently playing music, press play on the pc app or web player to activate it.  A message SHOULD display to tell you this as well.</p>
