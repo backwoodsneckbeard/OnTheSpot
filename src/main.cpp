@@ -31,15 +31,15 @@
 // Define the name of the directory for public files in the SPIFFS parition
 #define DIR_PUBLIC "/public"
 // Spotify API credentials
-// #define CLIENT_ID "b7aaed0542244cd2a065d335dad714b3"
-// #define CLIENT_SECRET "73237d02d2b34061956bccfafc6e50c5"
+// #define CLIENT_ID "
+// #define CLIENT_SECRET 
 // TODO: Configure your WiFi here
 #define WIFI_SSID "2WIRE471"
 #define WIFI_PSK  "9573436692"
 
 
-String CLIENT_ID = "";//"b7aaed0542244cd2a065d335dad714b3";
-String CLIENT_SECRET = "";//"73237d02d2b34061956bccfafc6e50c5";
+String CLIENT_ID = "";;
+String CLIENT_SECRET = "";;
 
 
 // We need to specify some content-type mapping, so the resources get delivered with the
