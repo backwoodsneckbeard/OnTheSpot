@@ -1,0 +1,29 @@
+{
+  "name": "OnTheSpot",
+  "version": "0.0.1",
+   "builds": [
+    {
+      "chipFamily": "ESP32",
+      "parts": [
+        { "path": "merged-firmware.bin", "offset": 0 }        
+      ]
+    },
+    {
+      "chipFamily": "ESP32-C3",
+      "parts": [{ "path": "merged-firmware.bin", "offset": 0 }
+      ]
+    },
+    {
+      "chipFamily": "ESP32-S2",
+      "parts": [
+        { "path": "merged-firmware.bin", "offset": 0 }
+      ]
+    },
+    {
+      "chipFamily": "ESP32-S3",
+      "parts": [
+        { "path": "merged-firmware.bin", "offset": 0 }
+      ]
+    }
+  ]
+}

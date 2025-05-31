@@ -29,14 +29,11 @@
 //we may be able to trim some fat here if ESP has built in time tools that cant spit out time_t 
 #include <time.h>
 // Define the name of the directory for public files in the SPIFFS parition
-#define DIR_PUBLIC "/public"
+#define DIR_PUBLIC "/public"git
 // Spotify API credentials
 // #define CLIENT_ID "
 // #define CLIENT_SECRET 
 // TODO: Configure your WiFi here
-#define WIFI_SSID "2WIRE471"
-#define WIFI_PSK  "9573436692"
-
 
 String CLIENT_ID = "";;
 String CLIENT_SECRET = "";;
@@ -630,13 +627,7 @@ public:
           //return false;
       } 
     }
-    void drawNoDeviceActive(){
-        tft.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - 60 , TFT_BLACK);                
-        tft.setTextDatum(MC_DATUM);
-        tft.setTextWrap(true);
-        tft.setCursor(tft.width()/2,tft.height() / 2);
-        tft.println("Press Play on App or PC");
-    }
+ 
     bool getAccessToken(String code) {
           
       
@@ -1064,6 +1055,23 @@ public:
       tft.setCursor(SCREEN_WIDTH / 6 , SCREEN_HEIGHT / 2);
       tft.println("LOADING");
     }
+    
+    void drawMessageOnScreen(String* msg, int size )
+    {      
+      Serial.print("hit loading screen, msg count = ");
+      Serial.println(msg->length());
+      tft.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - 60 , TFT_BLACK);
+      int msgPos = 0;
+      for(int i = 0; i < size; i++ )
+      {                          
+        tft.setCursor((SCREEN_WIDTH / 6) - 10 , (SCREEN_HEIGHT / 2) + msgPos );
+        tft.println(msg[i]);
+        Serial.print(msg[i] + " ");
+        Serial.print(msgPos);
+        msgPos += 20;        
+      }
+    }
+    
     bool drawScreen(bool fullRefresh = false, bool likeRefresh = false){
         
         if(fullRefresh){
@@ -1790,22 +1798,25 @@ void setup() {
   Serial.begin(115200);
   //SPIFFS.format();
   // Try to mount SPIFFS without formatting on failure
-  if (!SPIFFS.begin(false)) {
+  if (!SPIFFS.begin()) {
     // If SPIFFS does not work, we wait for serial connection...
-    while(!Serial);
-    delay(1000);
-
-    // Ask to format SPIFFS using serial interface
-    Serial.print("Mounting SPIFFS failed. Try formatting? (y/n): ");
-    while(!Serial.available());
-    Serial.println();
-
-    // If the user did not accept to try formatting SPIFFS or formatting failed:
-    if (Serial.read() != 'y' || !SPIFFS.begin(true)) {
-      Serial.println("SPIFFS not available. Stop.");
-      while(true);
+    Serial.println("SPIFFS mount failed, formatting...");
+    
+    // Format SPIFFS
+    if (SPIFFS.format()) {
+      Serial.println("SPIFFS formatted successfully");
+      
+      // Try to mount again after formatting
+      if (SPIFFS.begin()) {
+        Serial.println("SPIFFS mounted after formatting");
+      } else {
+        Serial.println("SPIFFS mount failed even after formatting");
+        return;
+      }
+    } else {
+      Serial.println("SPIFFS format failed");
+      return;
     }
-    Serial.println("SPIFFS has been formated.");
   }
   else
   {
@@ -1975,7 +1986,7 @@ if(spotifyConnection.accessTokenSet){
         else if(( millis() - refreshLoop) > 5000 ){
             Serial.println("LOOP: Refresh Token = " + spotifyConnection.ShowRefreshToken());
 
-            if(spotifyConnection.getTokenRemainingSeconds() <= 3559)// set back to 120 after testing!!//120)
+            if(spotifyConnection.getTokenRemainingSeconds() <= 120)
             {
               Serial.println("Token expiring in < 2 min, refreshing");
               spotifyConnection.refreshAccessToken();
@@ -1994,7 +2005,13 @@ if(spotifyConnection.accessTokenSet){
               Serial.println("Drawing no device screen");
               if(!spotifyConnection.noDeviceDrawn)
               {
-                spotifyConnection.drawNoDeviceActive();
+                  tft.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - 60 , TFT_BLACK);                
+                  tft.setTextDatum(MC_DATUM);
+                  tft.setTextWrap(true);
+                  
+                  String msg[1];
+                  msg[0]= "Press Play on App or PC";
+                  spotifyConnection.drawMessageOnScreen(msg, 1);
               }              
               spotifyConnection.LoadDevice();
               Serial.println("End no device screen");
@@ -2007,10 +2024,9 @@ if(spotifyConnection.accessTokenSet){
                 Serial.println("flushing client");            
                 spotifyConnection.flushClient();
               }                        
-              // spotifyConnection.drawScreen();
+
               refreshLoop = millis();
-              Serial.println("Leaving Get Track Info");
-            
+              Serial.println("Leaving Get Track Info");            
             }
             
             if(!spotifyConnection.skipbtndraw)
@@ -2031,13 +2047,20 @@ if(spotifyConnection.accessTokenSet){
             tft.setTextSize(1);
             
              
-            //tft.drawString(message , 20, 175);
-            tft.setCursor(20, 155); // Set the cursor to (10, 20)
-            tft.print("Visit");
-            tft.setCursor(20, 175); // Set the cursor to (10, 20)
-            tft.print("Https://" + WiFi.localIP().toString() +"/Dev");
-            tft.setCursor(20, 195); // Set the cursor to (10, 20)
-            tft.print("to set your dev creds");
+            String msgList[3];
+            msgList[0] = "Visit";
+            msgList[1] = "Https://" + WiFi.localIP().toString() +"/Dev";
+            msgList[2] = "to set your dev creds";
+
+            spotifyConnection.drawMessageOnScreen(msgList, 3);
+
+            // //tft.drawString(message , 20, 175);
+            // tft.setCursor(20, 155); // Set the cursor to (10, 20)
+            // tft.print("Visit");
+            // tft.setCursor(20, 175); // Set the cursor to (10, 20)
+            // tft.print("Https://" + WiFi.localIP().toString() +"/Dev");
+            // tft.setCursor(20, 195); // Set the cursor to (10, 20)
+            // tft.print("to set your dev creds");
             //this needs to be rethought since this variable is et to true in other functions, just for testing mainly
             messageDrawn = true;
           }
@@ -2047,10 +2070,18 @@ if(spotifyConnection.accessTokenSet){
           if(!messageDrawn){
             Serial.println("No Access Token Set");
             tft.fillScreen(TFT_BLACK);
-            tft.setTextWrap(true, false);
+            //tft.setTextWrap(true, false);
             tft.setTextSize(1);
-            tft.drawString("Vist Https://" + WiFi.localIP().toString() + " to set your access token" , 20, 175);
-            tft.drawString("to set your access token", 20, 200);
+
+            String msgList[3];
+            msgList[0] = "Visit";
+            msgList[1] = "Https://" + WiFi.localIP().toString();
+            msgList[2] = "to set your access token";
+
+            spotifyConnection.drawMessageOnScreen(msgList, 3);
+            
+            //tft.drawString("Vist Https://" + WiFi.localIP().toString() + " to set your access token" , 20, 175);
+            //tft.drawString("to set your access token", 20, 200);
             //this needs to be rethought since this variable is et to true in other functions, just for testing mainly
             messageDrawn = true;
           }
@@ -2267,17 +2298,8 @@ void handleSpotifyCallback(HTTPRequest* request, HTTPResponse* response) {
             "</HEAD>\n" \
             "<html><body><h1>Authorized and Token exchanged!</h1>\n" \
             "<p>You can close this window.</p>\n" \ 
-            "<p>Here is your base64 Header:</p>\n" \
-            "<p> Authorization: Basic " + base64Encode(String(CLIENT_ID) + ":" + String(CLIENT_SECRET))  + "</p>\n" \
-            "<p>Here is your code:</p>\n" \
-            "<p>" + String(spotifyCode.c_str()) + "</p>\n" \
-            "<p>Here is your refresh token:</p>\n" \
-            "<p>"+  spotifyConnection.ShowRefreshToken() +"</p>\n" \
-            "<p>Here is your access token:</p>\n" \
-            "<p>"+  spotifyConnection.ShowAccessToken() +"</p>\n" \
-            "<p><a href='/current'>Click to show current song</a><p>\n" \
             "</body></html>\n";
-        
+            
         response->print(html);
     }
     else
@@ -2303,100 +2325,21 @@ void handleSpotifyCallback(HTTPRequest* request, HTTPResponse* response) {
     response->print(html);
   }
 }
-void handleGetEvents(HTTPRequest * req, HTTPResponse * res) {
- // Status code is 200 OK by default.
-  // We want to deliver a simple HTML page, so we send a corresponding content type:
-  res->setHeader("Content-Type", "text/html");
-  char page[1000];
-  Serial.println("Client Id: " + CLIENT_ID);
-  String c = "b7aaed0542244cd2a065d335dad714b3";
-  sprintf(page, _login_page, c.c_str(), WiFi.localIP().toString());
-  Serial.println(page);
-  res->print(page);//(_login_page);
-  // The response implements the Print interface, so you can use it just like
-  // you would write to Serial etc.
-  // res->println("<!DOCTYPE html>");
-  // res->println("<html>");
-  // res->println("<head><title>Hello World!</title></head>");
-  // res->println("<body>");
-  // res->println("<h1>Hello World!</h1>");
-  // res->print("<p>Your server is running for ");
-  // // A bit of dynamic data: Show the uptime
-  // res->print((int)(millis()/1000), DEC);
-  // res->println(" seconds.</p>");
-  // res->println("</body>");
-  // res->println("</html>");
-  
+void handleGetEvents(HTTPRequest * req, HTTPResponse * res) {  
+ 
+    Serial.println("loading from handle get events()");
+    res->setHeader("Content-Type", "text/html");    
+    char buf[1000];
+    
+
+    Serial.print("Client ID: ");
+    Serial.println(CLIENT_ID);
+
+    sprintf(buf,_login_page , CLIENT_ID.c_str(), WiFi.localIP().toString() );
+    Serial.println(buf);
+    res->print(buf);
 }
-void handleCurrent(HTTPRequest * req, HTTPResponse * res){
-  res->setHeader("Content-Type", "text/html");
-  //make call to api post request here
-  
-  spotifyRequest.Method = "GET"; 
-  spotifyRequest.Request = "/v1/me/player/currently-playing HTTP/1.1";
-   
-  // if (makeSpotifyApiRequestASDOC(spotifyRequest, SPOTIFY_API_ENDPOINT, "")) {
-  //   //request success
-  //    // Success response
-  //       res->setStatusCode(200);
-  //       res->setStatusText("OK");
-  //       res->setHeader("Content-Type", "text/html");
-                
-  //       JsonArray artists = spotifyResponse["item"]["album"]["artists"].as<JsonArray>();
-  //       JsonArray image = spotifyResponse["item"]["album"]["images"].as<JsonArray>();
-  //       int artistCount = artists.size();
-  //       Serial.print("Found ");
-  //       Serial.print(artistCount);
-  //       Serial.println(" artists:");
-        
-  //       const char* trackName = spotifyResponse["item"]["name"].as<const char*>();
-        
-  //       Serial.println("track name");
-  //       Serial.println(trackName);
-        
-  //       const char* artistName;
-  //       for (int i = 0; i < artistCount; i++) {
-  //           artistName = artists[i]["name"];
-            
-  //           Serial.print(i+1);
-  //           Serial.print(". ");
-  //           Serial.print(artistName);                        
-  //       }
-
-  //       const char* imgUrl = image[1]["url"];
-  //       int height = image[1]["height"];
-  //       int width = image[1]["width"];
-
-  //       String html = \
-  //           "<HEAD>\n" \
-  //           "<TITLE>Currently Playing</TITLE>\n" \
-  //           "<meta http-equiv='refresh' content='3' />\n" \
-  //           "</HEAD>\n" \
-  //           "<html><body><h1 style='text-align: center'>Currently on Deck!</h1>\n" \            
-  //           "<p style='text-align: center'> <img src='"+ String(imgUrl) +"' style='Width:"+ String(width)+"px;Height:"+ String(height) +"px' /></p>\n" \
-  //           "<p style='text-align: center'> <strong>Artist:</strong> " + String(artistName)  + "</p>\n" \
-  //           "<p style='text-align: center'> <strong>Track:</strong> " + String(trackName)  + "</p>\n" \
-  //           "<p style='text-align: center'>\n "\
-  //               "<input type='button' value='Back'>\n "\
-  //               "<input type='button' value='Play/Pause'>\n "\
-  //               "<input type='button' value='Next'>\n "\
-  //           "</p>\n "\
-  //           "</body></html>\n";
-
-  //       res->print(html); 
-  // }
-  // else{
-  //   //request failed
-  //   // Error response
-  //       res->setStatusCode(400);
-  //       res->setStatusText("Bad Request");
-  //       res->setHeader("Content-Type", "text/html");
-        
-  //       String html = "<html><body><h1>Token Exchange failed</h1>";
-        
-  //       res->print(html);
-  // }  
-}
+void handleCurrent(HTTPRequest * req, HTTPResponse * res){  }
 void handleDevSetup(HTTPRequest * req, HTTPResponse * res)
 {
     
