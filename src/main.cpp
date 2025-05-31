@@ -29,7 +29,7 @@
 //we may be able to trim some fat here if ESP has built in time tools that cant spit out time_t 
 #include <time.h>
 // Define the name of the directory for public files in the SPIFFS parition
-#define DIR_PUBLIC "/public"git
+#define DIR_PUBLIC "/public"
 // Spotify API credentials
 // #define CLIENT_ID "
 // #define CLIENT_SECRET 
@@ -1674,8 +1674,22 @@ private:
 };
 
 void wifi_splash_screen() {
-  tft.drawString("Connect to" + String(DEFAULT_CAPTIVE_SSID) , 20, 175);
-  tft.drawString("or visit Http:192.168.1.4" , 20, 185);
+
+  String msg[3];
+  msg[0] = "Connect to"; 
+  msg[1] = String(DEFAULT_CAPTIVE_SSID);
+  msg[2] = "On your phone or pc";
+  tft.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - 60 , TFT_BLACK);
+  int msgPos = 0;
+  for(int i = 0; i < 3; i++ )
+  {                          
+    tft.setCursor((SCREEN_WIDTH / 6) - 10 , (SCREEN_HEIGHT / 2) + msgPos );
+    tft.println(msg[i]);
+    Serial.print(msg[i] + " ");
+    Serial.print(msgPos);
+    msgPos += 20;        
+  }
+  
 }
 void flush_wifi_splashscreen(uint32_t ms = 200) {
   uint32_t start = millis();
@@ -1807,7 +1821,7 @@ void setup() {
       Serial.println("SPIFFS formatted successfully");
       
       // Try to mount again after formatting
-      if (SPIFFS.begin()) {
+      if (SPIFFS.begin(true, "", 5)) {
         Serial.println("SPIFFS mounted after formatting");
       } else {
         Serial.println("SPIFFS mount failed even after formatting");
